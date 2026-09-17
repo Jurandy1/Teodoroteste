@@ -7,15 +7,17 @@ tailwind.config = {
           white: '#FFFFFF',
           bgLight: '#FCFAF9',       /* Seda suave off-white */
           cream: '#F8F4F1',
-          roseSoft: '#E8D4D0',      /* Rosé suave da marca */
-          roseMedium: '#D5B7B2',    /* Rosé mais encorpado e sofisticado */
-          roseLight: '#F7EFEB',     /* Fundo blush sutil */
-          gold: '#C5A059',          /* Dourado champanhe discreto */
-          goldLight: '#F6EEDB',
+          blush: '#F6EDEA',
+          page: '#FDFBF8',
+          roseSoft: '#E8D4D0',
+          roseMedium: '#D5B7B2',
+          roseLight: '#F7EFEB',
+          gold: '#C5A059',
+          goldLight: '#F0E6D8',
           goldDark: '#A6823F',
-          text: '#1E1A1A',          /* Preto carvão quente e nobre */
-          textMuted: '#6E6565',     /* Texto secundário límpido */
-          border: '#EDE4E0',        /* Divisórias ultrafinas e delicadas */
+          text: '#1E1A1A',
+          textMuted: '#6E6565',
+          border: '#EDE4E0',
           borderSubtle: '#F0E8E5'
         }
       },

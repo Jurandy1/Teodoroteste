@@ -96,9 +96,12 @@ function renderFilterGroupHTML(group, isMobile) {
     return `
       <div class="space-y-3">
         <h4 class="text-[11px] uppercase tracking-[0.14em] text-teodora-textMuted">${group.name}</h4>
-        <div class="flex flex-col gap-2 text-sm">
+        <div class="flex flex-col gap-1 text-sm">
+          <button onclick="setCategoryFilter('todos')" class="text-left px-3 py-2 rounded-md transition ${APP_STATE.filters.category === 'todos' ? 'filter-active text-teodora-text font-medium' : 'text-teodora-textMuted hover:text-teodora-text'}">
+            Todos os produtos
+          </button>
           ${group.options.map(opt => `
-            <button onclick="setCategoryFilter('${opt.value}')" class="text-left text-teodora-textMuted hover:text-teodora-text transition">
+            <button onclick="setCategoryFilter('${opt.value}')" class="text-left px-3 py-2 rounded-md transition ${APP_STATE.filters.category === opt.value ? 'filter-active text-teodora-text font-medium' : 'text-teodora-textMuted hover:text-teodora-text'}">
               ${opt.label}
             </button>
           `).join('')}
@@ -184,30 +187,27 @@ function setCategoryFilter(category) {
 }
 
 function updateNavigationUI(activeCategory) {
-  // 1. Atualiza botões da barra superior de navegação
   document.querySelectorAll('.nav-cat-btn').forEach(btn => {
     const cat = btn.getAttribute('data-nav-cat');
     if (cat === activeCategory) {
-      btn.classList.add('text-teodora-gold', 'border-teodora-gold', 'font-bold');
-      btn.classList.remove('border-transparent');
+      btn.classList.add('text-teodora-text', 'border-teodora-text');
+      btn.classList.remove('border-transparent', 'text-teodora-textMuted');
     } else {
-      btn.classList.remove('text-teodora-gold', 'border-teodora-gold', 'font-bold');
+      btn.classList.remove('text-teodora-gold', 'border-teodora-gold', 'border-teodora-text', 'font-bold');
       btn.classList.add('border-transparent');
     }
   });
 
-  // 2. Atualiza categorias visuais
   document.querySelectorAll('.cat-circle-card').forEach(card => {
     const cat = card.getAttribute('data-circle-cat');
     const label = card.querySelector('span');
     if (cat === activeCategory) {
-      if (label) label.classList.add('border-b', 'border-teodora-text');
+      if (label) label.classList.add('font-semibold', 'text-teodora-gold');
     } else {
-      if (label) label.classList.remove('border-b', 'border-teodora-text');
+      if (label) label.classList.remove('font-semibold', 'text-teodora-gold', 'border-b', 'border-teodora-text');
     }
   });
 
-  // 3. Atualiza botões no menu mobile
   document.querySelectorAll('.mobile-cat-pill').forEach(btn => {
     const cat = btn.getAttribute('data-mobile-cat');
     if (cat === activeCategory) {
@@ -257,10 +257,10 @@ function renderActiveFilterTags() {
   }
 
   // Preço Máximo
-  if (APP_STATE.filters.maxPrice < 500) {
+  if (APP_STATE.filters.maxPrice < PRICE_FILTER_MAX) {
     tags.push({
       label: `Até ${formatBRL(APP_STATE.filters.maxPrice)}`,
-      clear: () => handlePriceRangeChange(500)
+      clear: () => handlePriceRangeChange(PRICE_FILTER_MAX)
     });
   }
 
@@ -301,7 +301,7 @@ function renderActiveFilterTags() {
 
 function resetAllFilters() {
   APP_STATE.filters.category = 'todos';
-  APP_STATE.filters.maxPrice = 500;
+  APP_STATE.filters.maxPrice = PRICE_FILTER_MAX;
   APP_STATE.filters.badge = '';
   APP_STATE.filters.search = '';
   APP_STATE.filters.sortBy = 'populares';
@@ -311,10 +311,10 @@ function resetAllFilters() {
   if (dSearch) dSearch.value = '';
 
   const priceSlider = document.getElementById('priceRangeInput');
-  if (priceSlider) priceSlider.value = 500;
+  if (priceSlider) priceSlider.value = PRICE_FILTER_MAX;
 
   const priceLabel = document.getElementById('priceDisplayLabel');
-  if (priceLabel) priceLabel.innerText = "R$ 500,00";
+  if (priceLabel) priceLabel.innerText = formatBRL(PRICE_FILTER_MAX);
 
   const badgeDefault = document.querySelector('input[name="badgeFilter"][value=""]');
   if (badgeDefault) badgeDefault.checked = true;
@@ -399,11 +399,11 @@ function openProductPage(productId) {
   const pdpTitle = document.getElementById('pdpTitle');
   if (pdpTitle) pdpTitle.innerText = product.title;
   const badgeTag = document.getElementById('pdpBadgeTag');
-  if (badgeTag) badgeTag.innerText = product.badge || 'Criação Nobre';
+  if (badgeTag) badgeTag.innerText = product.badge || 'Destaque';
   const ratingEl = document.getElementById('pdpRating');
   if (ratingEl) ratingEl.innerText = product.rating.toFixed(1);
   const reviewsCount = document.getElementById('pdpReviewsCount');
-  if (reviewsCount) reviewsCount.innerText = `${product.reviews} avaliações verificadas`;
+  if (reviewsCount) reviewsCount.innerText = `${product.reviews} avaliações`;
 
   // Imagem principal e galeria
   const mainImg = document.getElementById('pdpMainImage');
@@ -440,21 +440,21 @@ function openProductPage(productId) {
     }
   }
 
-  // Pirâmide Olfativa
+  // Notas olfativas
   const topNotes = document.getElementById('pdpTopNotes');
   if (topNotes) topNotes.innerText = product.pyramid ? product.pyramid.top : product.notes;
   const heartNotes = document.getElementById('pdpHeartNotes');
   if (heartNotes) heartNotes.innerText = product.pyramid ? product.pyramid.heart : product.notes;
   const baseNotes = document.getElementById('pdpBaseNotes');
-  if (baseNotes) baseNotes.innerText = product.pyramid ? product.pyramid.base : 'Almíscar Nobre e Âmbar';
+  if (baseNotes) baseNotes.innerText = product.pyramid ? product.pyramid.base : 'Madeiras e almíscar';
 
   // Abas descritivas
   const descEl = document.getElementById('pdpDescription');
   if (descEl) descEl.innerText = product.description;
   const ritualEl = document.getElementById('pdpRitualAdvice');
-  if (ritualEl) ritualEl.innerText = product.ritual || 'Borrife nas áreas de maior pulsação sanguínea.';
+  if (ritualEl) ritualEl.innerText = product.ritual || 'Borrife nos pulsos e na nuca.';
   const ingrEl = document.getElementById('pdpIngredients');
-  if (ingrEl) ingrEl.innerText = product.ingredients || 'Fórmula pura com óleos botânicos nobres.';
+  if (ingrEl) ingrEl.innerText = product.ingredients || 'Alcohol Denat, Parfum, Aqua.';
   switchPdpTab('ritual');
 
   // Quantidade
@@ -717,7 +717,7 @@ function renderSimilarProducts(product) {
         <div class="pt-2 border-t border-teodora-border space-y-2">
           <span class="text-lg font-bold text-teodora-text block">${formatBRL(item.price)}</span>
           <button onclick="openProductPage(${item.id})" class="w-full py-2.5 px-3 rounded-xl bg-white border border-teodora-border hover:border-teodora-gold text-teodora-text text-[11px] font-semibold uppercase tracking-wider transition">
-            Conhecer Criação
+            Ver detalhes
           </button>
         </div>
       </div>
@@ -759,47 +759,46 @@ function toggleActiveFilter(active, checked) {
 function createProductCardHTML(item) {
   const isFav = APP_STATE.wishlist.some(w => w.id === item.id);
   const installment = item.price / 6;
+  let badgeClass = 'badge-default';
+  if (item.badge === 'Mais Vendido') badgeClass = 'badge-vendido';
+  else if (item.badge === 'Lançamento') badgeClass = 'badge-lancamento';
+  else if (item.badge === 'Edição Especial') badgeClass = 'badge-especial';
 
   return `
-    <article class="product-card group flex flex-col h-full bg-white border border-teodora-border">
-      <div onclick="openProductPage(${item.id})" class="product-card__media relative w-full overflow-hidden bg-teodora-bgLight cursor-pointer">
+    <article class="product-card group flex flex-col h-full overflow-hidden">
+      <div onclick="openProductPage(${item.id})" class="product-card__media relative w-full overflow-hidden cursor-pointer">
         <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" loading="lazy">
         ${item.badge ? `
-          <span class="absolute top-2 left-2 text-[9px] sm:text-[10px] uppercase tracking-[0.12em] text-teodora-text bg-white/95 px-1.5 py-0.5 sm:px-2 sm:py-1">
+          <span class="absolute top-2.5 left-2.5 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-semibold px-2 py-1 ${badgeClass}">
             ${item.badge}
           </span>
         ` : ''}
-        <button onclick="event.stopPropagation(); toggleWishlist(${item.id})" class="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-teodora-text/70 hover:text-teodora-text opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white/90" aria-label="Favoritar">
-          <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart text-xs sm:text-sm"></i>
+        <button onclick="event.stopPropagation(); toggleWishlist(${item.id})" class="absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center text-teodora-text/80 hover:text-teodora-text bg-white/90 transition" aria-label="Favoritar">
+          <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart text-sm"></i>
         </button>
       </div>
 
-      <div class="p-2.5 sm:p-3.5 flex-1 flex flex-col gap-2 sm:gap-2.5">
+      <div class="p-3 sm:p-4 flex-1 flex flex-col gap-2">
         <div class="space-y-1 cursor-pointer" onclick="openProductPage(${item.id})">
-          <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-teodora-textMuted line-clamp-1">${item.volume}</p>
-          <h3 class="font-heading text-sm sm:text-base font-normal text-teodora-text leading-snug line-clamp-2 group-hover:opacity-70 transition-opacity">
+          <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-teodora-textMuted line-clamp-1">${item.brandTag || item.volume}</p>
+          <h3 class="font-heading text-sm sm:text-[15px] font-normal text-teodora-text leading-snug line-clamp-2">
             ${item.title}
           </h3>
-          <p class="hidden sm:block text-xs text-teodora-textMuted font-light line-clamp-2 leading-relaxed">${item.notes}</p>
+          <p class="hidden sm:block text-[11px] text-teodora-textMuted font-light line-clamp-2 leading-relaxed">${item.notes}</p>
         </div>
 
-        <div class="mt-auto pt-1 space-y-2 border-t border-teodora-border/80">
-          <div onclick="openProductPage(${item.id})" class="cursor-pointer pt-2">
-            <div class="flex items-baseline gap-1.5 flex-wrap">
-              <span class="text-sm sm:text-base font-medium text-teodora-text tracking-tight">${formatBRL(item.price)}</span>
-              ${item.oldPrice ? `<span class="text-[10px] sm:text-xs text-teodora-textMuted line-through">${formatBRL(item.oldPrice)}</span>` : ''}
+        <div class="mt-auto pt-2 space-y-2.5">
+          <div onclick="openProductPage(${item.id})" class="cursor-pointer">
+            <div class="flex items-baseline gap-2 flex-wrap">
+              <span class="text-base font-semibold text-teodora-text tracking-tight">${formatBRL(item.price)}</span>
+              ${item.oldPrice ? `<span class="text-xs text-teodora-textMuted line-through">${formatBRL(item.oldPrice)}</span>` : ''}
             </div>
-            <p class="text-[10px] sm:text-[11px] text-teodora-textMuted mt-0.5">6x ${formatBRL(installment)}</p>
+            <p class="text-[11px] text-teodora-textMuted mt-0.5">ou 6x de ${formatBRL(installment)}</p>
           </div>
 
-          <div class="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-[11px] uppercase tracking-[0.12em]">
-            <button onclick="quickAddToCart(${item.id})" class="text-teodora-text border-b border-teodora-text pb-0.5 hover:opacity-70 transition">
-              Comprar
-            </button>
-            <button onclick="openProductPage(${item.id})" class="text-teodora-textMuted hover:text-teodora-text transition">
-              Detalhes
-            </button>
-          </div>
+          <button onclick="quickAddToCart(${item.id})" class="btn-comprar w-full py-2.5 text-[11px] uppercase tracking-[0.16em] font-semibold">
+            Comprar
+          </button>
         </div>
       </div>
     </article>
@@ -832,20 +831,20 @@ function renderProducts() {
   const remainingBatch = items.slice(3);
 
   let html = `
-    <div class="product-grid grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+    <div class="product-grid grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
       ${firstBatch.map(item => createProductCardHTML(item)).join('')}
     </div>
   `;
 
   if (remainingBatch.length > 0) {
     html += `
-      <div class="py-3 sm:py-4 px-3 sm:px-4 bg-white border border-teodora-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-        <p class="font-heading text-base sm:text-xl text-teodora-text font-normal">Fragrâncias em destaque</p>
-        <button onclick="setCategoryFilter('perfumes')" class="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-teodora-textMuted hover:text-teodora-text transition self-start sm:self-auto">
-          Ver perfumes →
+      <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-y border-teodora-border">
+        <p class="font-heading text-lg sm:text-xl text-teodora-text font-normal">Fragrâncias em destaque</p>
+        <button onclick="setCategoryFilter('perfumes')" class="text-[11px] uppercase tracking-[0.14em] text-teodora-gold hover:text-teodora-goldDark transition self-start sm:self-auto">
+          Ver mais opções →
         </button>
       </div>
-      <div class="product-grid grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+      <div class="product-grid grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
         ${remainingBatch.map(item => createProductCardHTML(item)).join('')}
       </div>
     `;
@@ -1157,7 +1156,7 @@ function openQuickModal(id) {
       </div>
       
       <div class="p-3 rounded-2xl bg-teodora-roseLight/60 text-xs text-teodora-text space-y-1.5 border border-teodora-border">
-        <p class="font-bold text-teodora-gold"><i class="fa-solid fa-feather-pointed"></i> Pirâmide Olfativa / Ativos Principais:</p>
+        <p class="font-bold text-teodora-gold"><i class="fa-solid fa-droplet"></i> Notas principais</p>
         <p class="text-teodora-textMuted">${p.notes}</p>
       </div>
 
@@ -1296,7 +1295,7 @@ function displayToast(htmlContent) {
   const outlet = document.getElementById('toastOutlet');
   const toast = document.createElement('div');
   toast.className = "pointer-events-auto bg-teodora-text text-white text-xs px-4 py-3.5 rounded-2xl shadow-xl border border-teodora-gold/40 flex items-center gap-2.5 max-w-sm transition-all duration-300 transform translate-y-2 opacity-0";
-  toast.innerHTML = `<i class="fa-solid fa-sparkles text-teodora-gold"></i><div class="flex-1">${htmlContent}</div>`;
+  toast.innerHTML = `<i class="fa-solid fa-check text-teodora-gold"></i><div class="flex-1">${htmlContent}</div>`;
   outlet.appendChild(toast);
 
   requestAnimationFrame(() => {
